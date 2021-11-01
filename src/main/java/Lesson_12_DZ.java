@@ -3,8 +3,8 @@ import java.util.Arrays;
 public class Lesson_12_DZ {
     static final int SIZE = 10000000;
     static final int HALF = SIZE / 2;
-    static float[] arr3;
-    static float[] arr4;
+    static float[] halfArray1;
+    static float[] halfArray2;
     static boolean isMyThreadEnd = false;
     static Object lock = new Object();
 
@@ -14,32 +14,33 @@ public class Lesson_12_DZ {
     }
 
     public static void method1() {
-        float[] arr = new float[SIZE];
-        Arrays.fill(arr, 1);
+        float[] arrFromMethod1 = new float[SIZE];
+        Arrays.fill(arrFromMethod1, 1);
 
         long a = System.currentTimeMillis();
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+        for (int i = 0; i < arrFromMethod1.length; i++) {
+            arrFromMethod1[i] = (float) (arrFromMethod1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
         }
         System.out.println("method1 выполнялся " + (System.currentTimeMillis() - a) + " миллисекунд");
     }
 
     public static void method2() {
-        float[] arr = new float[SIZE];
-        Arrays.fill(arr, 1);
+        float[] arrayFromMethod2 = new float[SIZE];
+
+        Arrays.fill(arrayFromMethod2, 1);
 
         long a = System.currentTimeMillis();
 
         synchronized (lock) {
-            arr3 = new float[HALF];
-            arr4 = new float[HALF];
-            System.arraycopy(arr, 0, arr3, 0, HALF);
-            System.arraycopy(arr, HALF, arr4, 0, HALF);
+            halfArray1 = new float[HALF];
+            halfArray2 = new float[HALF];
+            System.arraycopy(arrayFromMethod2, 0, halfArray1, 0, HALF);
+            System.arraycopy(arrayFromMethod2, HALF, halfArray2, 0, HALF);
 
             new Thread(new MyThread()).start();
 
-            for (int i = 0; i < arr4.length; i++) {
-                arr4[i] = (float) (arr4[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+            for (int i = 0; i < halfArray2.length; i++) {
+                halfArray2[i] = (float) (halfArray2[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
             }
             long c = System.currentTimeMillis();
             while (!isMyThreadEnd) {
@@ -50,8 +51,8 @@ public class Lesson_12_DZ {
                 }
             }
         }
-        System.arraycopy(arr3, 0, arr, 0, HALF);
-        System.arraycopy(arr4, 0, arr, HALF, HALF);
+        System.arraycopy(halfArray1, 0, arrayFromMethod2, 0, HALF);
+        System.arraycopy(halfArray2, 0, arrayFromMethod2, HALF, HALF);
         System.out.println("method2 выполнялся " + (System.currentTimeMillis() - a) + " миллисекунд");
     }
 
@@ -59,8 +60,8 @@ public class Lesson_12_DZ {
         @Override
         public void run() {
             synchronized (lock) {
-                for (int i = 0; i < arr3.length; i++) {
-                    arr3[i] = (float) (arr3[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+                for (int i = 0; i < halfArray1.length; i++) {
+                    halfArray1[i] = (float) (halfArray1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
                 }
                 isMyThreadEnd = true;
                 lock.notify();
