@@ -42,7 +42,6 @@ public class Lesson_12_DZ {
             for (int i = 0; i < halfArray2.length; i++) {
                 halfArray2[i] = (float) (halfArray2[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
             }
-            long c = System.currentTimeMillis();
             while (!isMyThreadEnd) {
                 try {
                     lock.wait();
