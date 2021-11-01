@@ -5,8 +5,8 @@ public class Lesson_12_DZ {
     static final int HALF = SIZE / 2;
     static float[] halfArray1;
     static float[] halfArray2;
-    static boolean isMyThreadEnd = false;
     static Object lock = new Object();
+    static int COUNTER;
 
     public static void main(String[] args) {
         method1();
@@ -42,7 +42,8 @@ public class Lesson_12_DZ {
             for (int i = 0; i < halfArray2.length; i++) {
                 halfArray2[i] = (float) (halfArray2[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
             }
-            while (!isMyThreadEnd) {
+
+            while (COUNTER < halfArray1.length) {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
@@ -59,10 +60,9 @@ public class Lesson_12_DZ {
         @Override
         public void run() {
             synchronized (lock) {
-                for (int i = 0; i < halfArray1.length; i++) {
-                    halfArray1[i] = (float) (halfArray1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+                for (COUNTER = 0; COUNTER < halfArray1.length; COUNTER++) {
+                    halfArray1[COUNTER] = (float) (halfArray1[COUNTER] * Math.sin(0.2f + COUNTER / 5) * Math.cos(0.2f + COUNTER / 5) * Math.cos(0.4f + COUNTER / 2));
                 }
-                isMyThreadEnd = true;
                 lock.notify();
             }
         }
