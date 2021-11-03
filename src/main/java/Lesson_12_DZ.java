@@ -83,12 +83,12 @@ public class Lesson_12_DZ {
 
     // работа с первой половиной массива
     public static void arrayCalculation1(float[] mainArray) {
-        float[] halfArray = new float[HALF];
-        System.arraycopy(mainArray, 0, halfArray, 0, HALF);
-        for (int i = 0; i < halfArray.length; i++) {
-            halfArray[i] = (float) (halfArray[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+        float[] halfArray1 = new float[HALF];
+        System.arraycopy(mainArray, 0, halfArray1, 0, HALF);
+        for (int i = 0; i < halfArray1.length; i++) {
+            halfArray1[i] = (float) (halfArray1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
         }
-        System.arraycopy(halfArray, 0, mainArray, 0, HALF);
+        System.arraycopy(halfArray1, 0, mainArray, 0, HALF);
     }
 
     // работа со второй половиной массива
@@ -100,6 +100,7 @@ public class Lesson_12_DZ {
         }
         System.arraycopy(halfArray2, 0, mainArray, HALF, HALF);
     }
+
     //вывод в консоль контрольных элементов массива для сравнения правильности рассчетов во всех трех методах
     public static void controlElementsPrint(float[] array) {
         System.out.println("Контроль [0]: " + array[0]);
