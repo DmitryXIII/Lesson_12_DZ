@@ -16,13 +16,11 @@ public class Lesson_12_DZ {
         System.out.println("method1 запустился");
         float[] arrFromMethod1 = new float[SIZE];
         Arrays.fill(arrFromMethod1, 1);
-
         long a = System.currentTimeMillis();
-        arrayCalculation1(arrFromMethod1);
-        System.out.println("Контроль [0]: " + arrFromMethod1[0]);
-        System.out.println("Контроль [4999999]: " + arrFromMethod1[4999999]);
-        System.out.println("Контроль [5000000]: " + arrFromMethod1[5000000]);
-        System.out.println("Контроль [9999999]: " + arrFromMethod1[9999999]);
+        for (int i = 0; i < arrFromMethod1.length; i++) {
+            arrFromMethod1[i] = (float) (arrFromMethod1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+        }
+        controlElementsPrint(arrFromMethod1);
         System.out.println("method1 выполнялся " + (System.currentTimeMillis() - a) + " миллисекунд");
         System.out.println("===============================================");
         System.out.println();
@@ -32,16 +30,10 @@ public class Lesson_12_DZ {
         System.out.println("method2 запустился");
         float[] arrayFromMethod2 = new float[SIZE];
         Arrays.fill(arrayFromMethod2, 1);
-
         long a = System.currentTimeMillis();
-
-        float[] halfArray2 = new float[HALF];
-
         MyThread threadForHelp = new MyThread(arrayFromMethod2);
         threadForHelp.start();
-
-        System.arraycopy(arrayFromMethod2, HALF, halfArray2, 0, HALF);
-        arrayCalculation2(halfArray2);
+        arrayCalculation2(arrayFromMethod2);
         synchronized (lock) {
             while (!threadForHelp.getIsDone()) {
                 try {
@@ -51,13 +43,8 @@ public class Lesson_12_DZ {
                 }
             }
         }
-
         System.arraycopy(threadForHelp.getHalfArray1(), 0, arrayFromMethod2, 0, HALF);
-        System.arraycopy(halfArray2, 0, arrayFromMethod2, HALF, HALF);
-        System.out.println("Контроль [0]: " + arrayFromMethod2[0]);
-        System.out.println("Контроль [4999999]: " + arrayFromMethod2[4999999]);
-        System.out.println("Контроль [5000000]: " + arrayFromMethod2[5000000]);
-        System.out.println("Контроль [9999999]: " + arrayFromMethod2[9999999]);
+        controlElementsPrint(arrayFromMethod2);
         System.out.println("method2 выполнялся " + (System.currentTimeMillis() - a) + " миллисекунд");
         System.out.println("===============================================");
         System.out.println();
@@ -72,20 +59,14 @@ public class Lesson_12_DZ {
 
         new Thread(() -> {
             System.out.println("Поток 0 запущен");
-            float[] halfArray1 = new float[HALF];
-            System.arraycopy(arrayFromMethod3, 0, halfArray1, 0, HALF);
-            arrayCalculation1(halfArray1);
-            System.arraycopy(halfArray1, 0, arrayFromMethod3, 0, HALF);
+            arrayCalculation1(arrayFromMethod3);
             System.out.println("Поток 0 закончил работу");
             cdl.countDown();
         }).start();
 
         new Thread(() -> {
             System.out.println("Поток 1 запущен");
-            float[] halfArray2 = new float[HALF];
-            System.arraycopy(arrayFromMethod3, HALF, halfArray2, 0, HALF);
-            arrayCalculation2(halfArray2);
-            System.arraycopy(halfArray2, 0, arrayFromMethod3, HALF, HALF);
+            arrayCalculation2(arrayFromMethod3);
             System.out.println("Поток 1 закончил работу");
             cdl.countDown();
         }).start();
@@ -96,23 +77,35 @@ public class Lesson_12_DZ {
                 InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Контроль [0]: " + arrayFromMethod3[0]);
-        System.out.println("Контроль [4999999]: " + arrayFromMethod3[4999999]);
-        System.out.println("Контроль [5000000]: " + arrayFromMethod3[5000000]);
-        System.out.println("Контроль [9999999]: " + arrayFromMethod3[9999999]);
+        controlElementsPrint(arrayFromMethod3);
         System.out.println("method3 выполнялся " + (System.currentTimeMillis() - a) + " миллисекунд");
     }
 
-    public static void arrayCalculation1(float[] array) {
-        for (int i = 0; i < array.length; i++) {
-            array[i] = (float) (array[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+    // работа с первой половиной массива
+    public static void arrayCalculation1(float[] mainArray) {
+        float[] halfArray = new float[HALF];
+        System.arraycopy(mainArray, 0, halfArray, 0, HALF);
+        for (int i = 0; i < halfArray.length; i++) {
+            halfArray[i] = (float) (halfArray[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
         }
+        System.arraycopy(halfArray, 0, mainArray, 0, HALF);
     }
 
-    public static void arrayCalculation2(float[] array) {
-        for (int j = 0; j < array.length; j++) {
-            array[j] = (float) (array[j] * Math.sin(0.2f + (j + HALF) / 5) * Math.cos(0.2f + (j + HALF) / 5) * Math.cos(0.4f + (j + HALF) / 2));
+    // работа со второй половиной массива
+    public static void arrayCalculation2(float[] mainArray) {
+        float[] halfArray2 = new float[HALF];
+        System.arraycopy(mainArray, HALF, halfArray2, 0, HALF);
+        for (int j = 0; j < halfArray2.length; j++) {
+            halfArray2[j] = (float) (halfArray2[j] * Math.sin(0.2f + (j + HALF) / 5) * Math.cos(0.2f + (j + HALF) / 5) * Math.cos(0.4f + (j + HALF) / 2));
         }
+        System.arraycopy(halfArray2, 0, mainArray, HALF, HALF);
+    }
+    //вывод в консоль контрольных элементов массива для сравнения правильности рассчетов во всех трех методах
+    public static void controlElementsPrint(float[] array) {
+        System.out.println("Контроль [0]: " + array[0]);
+        System.out.println("Контроль [4999999]: " + array[4999999]);
+        System.out.println("Контроль [5000000]: " + array[5000000]);
+        System.out.println("Контроль [9999999]: " + array[9999999]);
     }
 
     static class MyThread extends Thread {
@@ -137,7 +130,9 @@ public class Lesson_12_DZ {
         public void run() {
             System.out.println("Поток 0 запущен");
             synchronized (lock) {
-                arrayCalculation1(this.halfArray1);
+                for (int i = 0; i < this.halfArray1.length; i++) {
+                    this.halfArray1[i] = (float) (this.halfArray1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+                }
                 this.isDone = true;
                 System.out.println("Поток 0 закончил работу");
                 lock.notify();
